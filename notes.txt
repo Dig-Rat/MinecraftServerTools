@@ -1,0 +1,50 @@
+
+https://minecraft.wiki/w/Tutorials/Setting_up_a_server
+
+#############################
+java download & install
+
+error
+openjdk-17 installed, need openjdk-21
+java.lang.UnsupportedClassVersionError: net/minecraft/bundler/Main has been compiled by a more recent version of the Java Runtime (class file version 65.0), this version of the Java Runtime only recognizes class file versions up to 61.0
+
+#############################
+# download openjdk 21
+
+# Download the OpenJDK 21 binaries from the OpenJDK website:
+wget https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/openjdk-21_linux-x64_bin.tar.gz
+
+# extract tarball
+tar -xzf openjdk-21_linux-x64_bin.tar.gz
+
+# move result to a suitable directory
+sudo mv jdk-21 /opt/
+
+# Set environment variables to use OpenJDK 21: Add the following lines to your .bashrc or .profile:
+export JAVA_HOME=/opt/jdk-21
+export PATH=$JAVA_HOME/bin:$PATH
+
+# source the file to apply the changes:
+source ~/.bashrc
+
+# Change default JDK if needed..
+sudo update-java-alternatives --set msopenjdk-21-amd64
+
+# verify installation
+java -version
+
+
+#############################
+forward port
+
+#############################
+Add new user
+
+#############################
+download minecraft server file
+
+#############################
+run server
+java -jar server.jar --nogui
+
+java -Xmx4G -Xms2G -XX:SoftMaxHeapSize=3G -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -jar server.jar --nogui
