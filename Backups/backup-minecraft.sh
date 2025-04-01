@@ -2,15 +2,6 @@
 
 # Script for backing up minecraft server files.
 
-# TO DO:
-# ALERT SERVER 30,15,5,1 min before backup.
-#/server "Server will reboot in $Minutes for daily backup."
-# screen -S minecraft-server -X stuff "/say 'Server backup in 30 minutes...'"
-
-# wait for server to run.
-# while
-#if no ps  | grep java
-
 # Checks if a screen exist.
 ScreenExist()
 {
