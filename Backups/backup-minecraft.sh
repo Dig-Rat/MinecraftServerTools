@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 
 # Script for backing up minecraft server files.
 
@@ -59,6 +59,21 @@ ScreenCommand()
     done
     
     return 0
+}
+
+# Send a countdown to the server.
+ServerCountdown()
+{
+    # arg1: screen name
+    local sessionName="$1"
+    # arg2: seconds
+    local seconds="$2"
+    for ((i=0; i<5; i++))
+    done
+    for ((i=seconds; i>0; i--))
+        ScreenCommand $sessionName "/say 'Server reboot in $i seconds'"
+        sleep 1
+    done
 }
 
 # break this into smaller methods.
@@ -138,40 +153,39 @@ TarDir()
 Run()
 {    
     # make sure users & directories provided exist.
+    # add hard copy to screen commands for debugging!
 
+    local ScreenName="minecraft-server"
 
-    ScreenName="minecraft-server"
     # 5 min warning.
-    ScreenCommand $ScreenName "/say 'Server reboot in 5 minutes.'"
+    ScreenCommand $ScreenName "/say 'Server reboot in 5 minutes'"
     sleep 300
+
     # Command server to create a save.
     ScreenCommand $ScreenName "/save-all"
+
     # 1 min warning.
-    # --
-    # countdown last 30 sec for fun :)
-    # --
-    # turn off the server.
+    ScreenCommand $ScreenName "/say 'Server reboot in 60 seconds'"
+    sleep 30
+
+    # Countdown last 30 seconds.
+    ServerCountdown $ScreenName 30
+
+    # Stop the minecraft server.
     ScreenCommand $ScreenName "/stop"
+
     # Run backup
     BackupServerDir
+
     # Start Server
     ScreenCommand $ScreenName "./start_server.sh"
-    echo "done"
-# add hard copy to screen commands for debugging! :D
 
-   
+    echo "done"
+return 0
 }
 
 # Main
-
-# --30 minutes warning
-# --10 minute warning
-# --5 minute warning
-# --Save server
-# --1 minute warning
-# --per second countdown.
-# --stop server
 BackupServerDir
-# --start server
+#Run
 
 # end
