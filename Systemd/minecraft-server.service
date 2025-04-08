@@ -1,0 +1,21 @@
+[Unit]
+# Description of service.
+Description=Minecraft Server
+# Ensure network is up/online before running.
+After=network.target
+
+[Service]
+# Run the service as the minecraft user.
+User=minecraft
+# Directory where the server runs.
+WorkingDirectory=/home/minecraft/Server/
+# Start the server within a detached screen session.
+ExecStart=/usr/bin/screen -DmS minecraft /bin/bash -c '/path/to/java -Xms2G -Xmx4G -jar server.jar nogui'
+# Gracefully stop the server when service is stopped.
+ExecStop=/usr/bin/screen -S minecraft -X stuff "stop\n"
+# Restart automatically if the server crashes.
+Restart=always
+
+[Install]
+# Start this service at boot.
+WantedBy=multi-user.target
