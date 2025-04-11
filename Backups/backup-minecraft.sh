@@ -1,15 +1,6 @@
-#!/bin/bash
+ #!/bin/bash
 
 # Script for backing up minecraft server files.
-
-# TO DO:
-# ALERT SERVER 30,15,5,1 min before backup.
-#/server "Server will reboot in $Minutes for daily backup."
-# screen -S minecraft-server -X stuff "/say 'Server backup in 30 minutes...'"
-
-# wait for server to run.
-# while
-#if no ps  | grep java
 
 # Checks if a screen exist.
 ScreenExist()
@@ -59,6 +50,21 @@ ScreenCommand()
     done
     
     return 0
+}
+
+# Send a countdown to the server.
+ServerCountdown()
+{
+    # arg1: screen name
+    local sessionName="$1"
+    # arg2: seconds
+    local seconds="$2"
+    for ((i=0; i<5; i++))
+    done
+    for ((i=seconds; i>0; i--))
+        ScreenCommand $sessionName "/say 'Server reboot in $i seconds'"
+        sleep 1
+    done
 }
 
 # Backup the serber directory to another directory
@@ -184,22 +190,30 @@ echo "done!"
 Run()
 {    
     # make sure users & directories provided exist.
+    # add hard copy to screen commands for debugging!
 
+    local ScreenName="minecraft-server"
 
-    ScreenName="minecraft-server"
     # 5 min warning.
-    ScreenCommand $ScreenName "/say 'Server reboot in 5 minutes.'"
+    ScreenCommand $ScreenName "/say 'Server reboot in 5 minutes'"
     sleep 300
+
     # Command server to create a save.
     ScreenCommand $ScreenName "/save-all"
+
     # 1 min warning.
-    # --
-    # countdown last 30 sec for fun :)
-    # --
-    # turn off the server.
+    ScreenCommand $ScreenName "/say 'Server reboot in 60 seconds'"
+    sleep 30
+
+    # Countdown last 30 seconds.
+    ServerCountdown $ScreenName 30
+
+    # Stop the minecraft server.
     ScreenCommand $ScreenName "/stop"
+
     # Run backup
     BackupServerDir
+
 
     local sourceDirectory="/home/minecraft/Server"
     local localBackupDirectory="/home/minecraft/Backups"
@@ -207,13 +221,13 @@ Run()
 
     # Start Server
     ScreenCommand $ScreenName "./start_server.sh"
-    echo "done"
-    # add hard copy to screen commands for debugging! :D
-    # ----
 
-    return 0
+    echo "done"
+return 0
 }
 
 # Main
-Run
+BackupServerDir
+#Run
+
 # end
