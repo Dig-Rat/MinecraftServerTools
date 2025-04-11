@@ -61,6 +61,69 @@ ScreenCommand()
     return 0
 }
 
+# Backup the serber directory to another directory
+BackupLocal()
+{
+    local sourceDirectory="$1"
+    local localBackupDirectory="$2"
+    #sourceDirectory="/home/minecraft/Server"
+    #localBackupDirectory="/home/minecraft/Backups"
+
+    # Create a timestamp for distinct file names.
+    local timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+    local backupFileName="$localBackupDirectory/Save$timestamp"
+
+    # Full path to backup file.
+    local localBackupPath="$localBackupDirectory/$backupFileName.tar.gz"
+    local nasBackupFilePath="$nasBackupDirectory/$backupFileName.tar.gz"
+
+    # Create folder for backup files.
+    echo "Creating Directory $localBackupDirectory"
+    mkdir -p "$localBackupDirectory"
+    echo "Created Directory $localBackupDirectory"
+
+    # Create local tarball.
+    echo "Creating tarball - please wait..."
+    tar --checkpoint=1000 -czf "$localBackupPath" -C "$sourceDirectory" .
+    echo "tarball created: $localBackupPath"
+
+    # Check if tarball was created successfully.
+    if [ -f "$localBackupPath" ]; then
+        echo "Backup success - Created: $localBackupPath"
+        return 0
+    else
+        echo "Error: backup creation failure"
+        return 1
+    fi
+}
+
+# Sync local backups with remote backups.
+SyncRemoteBackups()
+{
+    local localBackupFilePath="$1"
+    local remoteBackupFilePath="$2"
+    local remoteBackupDirectory="$3"
+
+    # Copy tarball file to samba share/nas.
+    echo "Copying: $localBackupFilePath"
+    echo "To: $remoteBackupFilePath"
+    rsync -av --progress "$localBackupFilePath" "$remoteBackupDirectory/"
+    
+    # Verify if the copy was sucessful.
+    if [ -f "$remoteBackupFilePath" ]; then
+    echo "Backup copied successfully: $remoteBackupFilePath"
+    return 0
+    
+    # local copy may be removed after remote copy is comfirmed.
+    #rm "$localBackupFilePath"
+    #echo "local backup removed"
+
+    else
+    echo "Error: copy failure"
+    return 1
+    fi
+}
+
 # break this into smaller methods.
 # Creates a backup folder
 # Creates a tarball of the server directory.
@@ -117,23 +180,6 @@ fi
 echo "done!"
 }
 
-# Create tarball of directory conents
-TarDir()
-{
-    # expecting 2 params
-    # make sure tar file is not contained in directory.
-    local tarFile="$1"
-    local backupDir="$2"
-    if echo "$tarFile" | grep -q "$backupDir"; then
-    echo "cannot create backup within backup!"
-    fi
-    echo "Creating tarball - please wait..."
-    # recursivly backup a directory.
-    tar --checkpoint=1000 -czf "$tarFile" -C "$backupDir" .
-    echo "tarball created: $tarFile"
-    return 0
-}
-
 # overall logic / plan (just invoke this in main for less clutter in main.
 Run()
 {    
@@ -154,24 +200,20 @@ Run()
     ScreenCommand $ScreenName "/stop"
     # Run backup
     BackupServerDir
+
+    local sourceDirectory="/home/minecraft/Server"
+    local localBackupDirectory="/home/minecraft/Backups"
+    BackupLocal $sourceDirectory 
+
     # Start Server
     ScreenCommand $ScreenName "./start_server.sh"
     echo "done"
-# add hard copy to screen commands for debugging! :D
+    # add hard copy to screen commands for debugging! :D
+    # ----
 
-   
+    return 0
 }
 
 # Main
-
-# --30 minutes warning
-# --10 minute warning
-# --5 minute warning
-# --Save server
-# --1 minute warning
-# --per second countdown.
-# --stop server
-BackupServerDir
-# --start server
-
+Run
 # end
